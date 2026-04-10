@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medo - الجهاز المناعي</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap');
+
+        /* المتغيرات الأساسية (الثيم الافتراضي - سايبر بلو) */
+        :root {
+            --primary: #00f2fe;
+            --secondary: #4facfe;
+            --bg-dark: #050a10;
+            --card-glass: rgba(15, 25, 35, 0.7);
+            --border-glass: rgba(255, 255, 255, 0.1);
+            --text-main: #e0e6ed;
+            --hl-func: #00ff88;
+            --hl-patho: #ff4d4d;
+            --hl-link: #fbff00;
+            --particle-color: #00f2fe;
+        }
+
+        /* 1. Neon Matrix */
+        [data-theme="matrix"] {
+            --primary: #00ff41;
+            --secondary: #008f11;
+            --bg-dark: #000000;
+            --card-glass: rgba(0, 20, 0, 0.8);
+            --text-main: #e0ffe0;
+            --hl-func: #00ffcc;
+            --hl-patho: #ff3333;
+            --particle-color: #00ff41;
+        }
+
+        /* 2. Crimson Blood */
+        [data-theme="blood"] {
+            --primary: #ff003c;
+            --secondary: #8a0303;
+            --bg-dark: #0a0000;
+            --card-glass: rgba(30, 0, 5, 0.8);
+            --text-main: #ffe6e6;
+            --hl-func: #ffcc00;
+            --hl-patho: #ff0000;
+            --particle-color: #ff003c;
+        }
+
+        /* 3. Royal Amethyst */
+        [data-theme="amethyst"] {
+            --primary: #d600ff;
+            --secondary: #6600ff;
+            --bg-dark: #0a0014;
+            --card-glass: rgba(20, 0, 30, 0.8);
+            --text-main: #f0e6ff;
+            --hl-func: #00ffff;
+            --hl-patho: #ff0066;
+            --particle-color: #d600ff;
+        }
+
+        /* 4. Solar Flare */
+        [data-theme="solar"] {
+            --primary: #ff8c00;
+            --secondary: #ff0000;
+            --bg-dark: #140500;
+            --card-glass: rgba(35, 10, 0, 0.8);
+            --text-main: #ffebd6;
+            --hl-func: #ffff00;
+            --hl-patho: #ff3300;
+            --particle-color: #ff8c00;
+        }
+
+        /* 5. Deep Ocean */
+        [data-theme="ocean"] {
+            --primary: #00e5ff;
+            --secondary: #001f3f;
+            --bg-dark: #000814;
+            --card-glass: rgba(0, 15, 30, 0.8);
+            --text-main: #d6faff;
+            --hl-func: #00ffaa;
+            --hl-patho: #ff6666;
+            --particle-color: #00e5ff;
+        }
+
+        /* 6. Bio-Hazard */
+        [data-theme="hazard"] {
+            --primary: #ffee00;
+            --secondary: #333300;
+            --bg-dark: #0a0a00;
+            --card-glass: rgba(25, 25, 0, 0.8);
+            --text-main: #ffffcc;
+            --hl-func: #00ff00;
+            --hl-patho: #ff0000;
+            --particle-color: #ffee00;
+        }
+
+        /* 7. Monochrome Tech */
+        [data-theme="mono"] {
+            --primary: #ffffff;
+            --secondary: #888888;
+            --bg-dark: #050505;
+            --card-glass: rgba(20, 20, 20, 0.8);
+            --text-main: #ffffff;
+            --hl-func: #cccccc;
+            --hl-patho: #555555;
+            --particle-color: #ffffff;
+        }
+
+        /* 8. Forest Synapse */
+        [data-theme="forest"] {
+            --primary: #2ecc71;
+            --secondary: #1abc9c;
+            --bg-dark: #01140a;
+            --card-glass: rgba(5, 30, 15, 0.8);
+            --text-main: #e6ffed;
+            --hl-func: #f1c40f;
+            --hl-patho: #e74c3c;
+            --particle-color: #2ecc71;
+        }
+
+        /* 9. Quantum Gold */
+        [data-theme="gold"] {
+            --primary: #ffd700;
+            --secondary: #b8860b;
+            --bg-dark: #120f00;
+            --card-glass: rgba(30, 25, 0, 0.8);
+            --text-main: #fffdf0;
+            --hl-func: #00ffcc;
+            --hl-patho: #ff3333;
+            --particle-color: #ffd700;
+        }
+
+        /* 10. Void Walker (Dark Matter) */
+        [data-theme="void"] {
+            --primary: #8a2be2;
+            --secondary: #000000;
+            --bg-dark: #030005;
+            --card-glass: rgba(10, 0, 20, 0.7);
+            --text-main: #e0d6ff;
+            --hl-func: #00ffcc;
+            --hl-patho: #ff0055;
+            --particle-color: #8a2be2;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Cairo', sans-serif; }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            overflow-x: hidden;
+            line-height: 1.6;
+            transition: background-color 0.5s ease, color 0.5s ease;
+        }
+
+        /* محرك الجزيئات الخلفي */
+        #particle-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: radial-gradient(circle at center, rgba(16, 32, 48, 0.3) 0%, var(--bg-dark) 100%);
+        }
+
+        header {
+            padding: 20px 5%;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(15px);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-glass);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .logo { 
+            font-size: 26px; 
+            font-weight: 900; 
+            color: var(--primary); 
+            text-transform: uppercase; 
+            letter-spacing: 2px; 
+            text-shadow: 0 0 10px var(--primary);
+            transition: color 0.5s ease, text-shadow 0.5s ease;
+        }
+
+        .container {
+            max-width: 1500px;
+            margin: 40px auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            padding: 0 20px;
+        }
+
+        .hero-box {
+            grid-column: 1 / -1;
+            padding: 60px;
+            background: var(--card-glass);
+            border-radius: 30px;
+            border: 1px solid var(--border-glass);
+            text-align: center;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+
+        .card {
+            background: var(--card-glass);
+            border: 1px solid var(--border-glass);
+            border-radius: 20px;
+            padding: 30px;
+            backdrop-filter: blur(12px);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease, border-color 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card:hover { 
+            border-color: var(--primary); 
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 20px var(--primary); 
+            transform: scale(1.03) translateY(-5px);
+            z-index: 10;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 4px;
+            background: linear-gradient(90deg, transparent, var(--primary), transparent);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+        .card:hover::before { opacity: 1; }
+
+        h2, h3 { color: var(--primary); margin-bottom: 20px; transition: color 0.5s ease; }
+        
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.4rem;
+            border-right: 5px solid var(--primary);
+            padding-right: 15px;
+        }
+
+        ul { list-style: none; }
+        li { margin-bottom: 15px; position: relative; padding-right: 25px; }
+        li::before { content: '◈'; position: absolute; right: 0; color: var(--primary); transition: color 0.5s ease; }
+
+        .func { color: var(--hl-func); font-weight: bold; }
+        .patho { color: var(--hl-patho); font-weight: bold; }
+        .link { color: var(--hl-link); border-bottom: 1px dashed var(--hl-link); }
+
+        .badge {
+            background: var(--primary);
+            color: #000;
+            padding: 4px 12px;
+            border-radius: 50px;
+            font-size: 12px;
+            font-weight: 900;
+            margin-bottom: 15px;
+            display: inline-block;
+            box-shadow: 0 0 10px var(--primary);
+            transition: background 0.5s ease, box-shadow 0.5s ease;
+        }
+
+        /* نافذة التحكم */
+        .controls {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            z-index: 1001;
+        }
+
+        .settings-panel {
+            background: var(--card-glass);
+            padding: 25px;
+            border-radius: 20px;
+            border: 1px solid var(--primary);
+            display: none;
+            box-shadow: 0 0 30px rgba(0,0,0,0.8);
+            backdrop-filter: blur(20px);
+            color: white;
+        }
+
+        .active { display: block; animation: fadeIn 0.3s ease; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        button {
+            padding: 10px 25px;
+            border-radius: 12px;
+            border: 1px solid var(--primary);
+            background: transparent;
+            color: var(--primary);
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Cairo', sans-serif;
+        }
+
+        button:hover {
+            background: var(--primary);
+            color: #000;
+            box-shadow: 0 0 15px var(--primary);
+        }
+
+        select, input[type="range"] {
+            width: 100%;
+            margin-top: 10px;
+            margin-bottom: 15px;
+            padding: 8px;
+            background: rgba(0,0,0,0.5);
+            color: white;
+            border: 1px solid var(--primary);
+            border-radius: 8px;
+            font-family: 'Cairo', sans-serif;
+        }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; color: var(--text-main); }
+        th, td { padding: 10px; border: 1px solid var(--border-glass); text-align: right; }
+        th { background: rgba(0, 0, 0, 0.4); color: var(--primary); }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            margin-top: 40px;
+            border-top: 1px solid var(--border-glass);
+            background: rgba(0,0,0,0.4);
+            color: var(--primary);
+            font-weight: bold;
+            backdrop-filter: blur(5px);
+        }
+    </style>
+</head>
+<body>
+
+<canvas id="particle-canvas"></canvas>
+
+<header>
+    <div class="logo">Medo </div>
+    <button onclick="document.querySelector('.settings-panel').classList.toggle('active')">⚙️ الاعدادات</button>
+</header>
+
+<div class="controls">
+    <div class="settings-panel">
+        <h4 style="margin-bottom: 15px; color: var(--primary); text-align: center;">النظام البيئي</h4>
+        
+        <label>🎨 اختيار الثيم </label>
+        <select id="themeSelector" onchange="changeTheme()">
+            <option value="default">🌐 Cyber Blue (الافتراضي)</option>
+            <option value="matrix">💻 Neon Matrix (ماتريكس)</option>
+            <option value="blood">🩸 Crimson Blood (الدموي)</option>
+            <option value="amethyst">🔮 Royal Amethyst (الأرجواني)</option>
+            <option value="solar">☀️ Solar Flare (الشمسي)</option>
+            <option value="ocean">🌊 Deep Ocean (المحيط)</option>
+            <option value="hazard">☣️ Bio-Hazard (الإشعاعي)</option>
+            <option value="forest">🌲 Forest Synapse (البيولوجي)</option>
+            <option value="gold">👑 Quantum Gold (الذهبي)</option>
+            <option value="void">🌌 Void Walker (المادة المظلمة)</option>
+            <option value="mono">⚙️ Monochrome Tech (أحادي اللون)</option>
+        </select>
+
+        <label>✨ كثافة الجسيمات</label>
+        <input type="range" id="pCount" min="20" max="400" value="150" onchange="initParticles()">
+        
+        <label>⚡ سرعة التفاعل</label>
+        <input type="range" id="pSpeed" min="0.5" max="5" value="1.5" step="0.5">
+    </div>
+</div>
+
+<div class="container">
+    <div class="hero-box">
+        <h1 style="font-size: 2.5rem; text-shadow: 0 0 20px var(--primary); color: var(--primary);">الجهاز المناعي</h1>
+        <p style="font-size: 1.2rem; margin-top: 15px;">الفصل الرابع: المناعة في الكائنات الحية - شرح تفصيلي لآليات الدفاع وخطوط المواجهة</p>
+    </div>
+
+    <div class="card">
+        <span class="badge">Lymphatic System</span>
+        <h3 class="section-title">🏰 الأعضاء الليمفاوية (أماكن التصنيع والتدريب)</h3>
+        <p style="margin-bottom: 15px;">الجهاز المناعي <span class="link">"جهاز متناثر"</span> لا تتصل أعضاؤه تشريحياً، بل يربطها الدم واللمف.</p>
+        <ul>
+            <li><strong>نخاع العظام الأحمر:</strong> يوجد في العظام المسطحة ورؤوس العظام الطويلة. هو المسؤول عن <span class="func">إنتاج</span> جميع خلايا الدم، وفيه تنضج الخلايا البائية (B) والقاتلة الطبيعية (NK).</li>
+            <li><strong>الغدة التيموسية:</strong> تقع أعلى القلب. تفرز هرمون <span class="func">التيموسين</span> لتحويل الخلايا الليمفاوية الجذعية إلى خلايا تائية (T) وتمايزها.</li>
+            <li><strong>اللوزتان:</strong> تلتقطان الميكروبات مع الطعام والهواء.</li>
+            <li><strong>الطحال:</strong> يحتوي على خلايا بلعمية تلتهم الميكروبات وكريات الدم الحمراء <span class="patho">الهرمة</span>.</li>
+            <li><strong>بقع باير:</strong> عقد بالغشاء المخاطي للأمعاء الدقيقة تستجيب ضد الميكروبات المعوية.</li>
+            <li><strong>العقد الليمفاوية:</strong> تعمل كـ <span class="func">مرشحات</span> لليمف وتخزن الخلايا الليمفاوية.</li>
+        </ul>
+    </div>
+
+    <div class="card">
+        <span class="badge">White Blood Cells</span>
+        <h3 class="section-title">🪖 خلايا الدم البيضاء (العساكر)</h3>
+        <ul>
+            <li><strong>خلايا محببة:</strong> (متعادلة، حامضية، قاعدية) تهاجم البكتيريا والالتهابات، تفرز إنزيمات محللة.</li>
+            <li><strong>وحيدة النواة (Monocytes):</strong> تتحول إلى <span class="func">خلايا بلعمية</span> عند الحاجة لتدمر الأجسام الغريبة.</li>
+            <li><strong>الخلايا الليمفاوية (20-30%):</strong>
+                <ul style="margin-top: 10px; margin-right: 20px;">
+                    <li><span class="link">البائية (B):</span> تنتج الأجسام المضادة (10-15%).</li>
+                    <li><span class="link">التائية (T):</span> (80%) وتشمل: <span class="func">T_h</span> (المساعدة - CD4)، و <span class="patho">T_c</span> (السامة - CD8)، و <span class="func">T_s</span> (الكابحة - CD8).</li>
+                    <li><span class="link">القاتلة الطبيعية (NK):</span> (5-10%) تهاجم الخلايا المصابة بالفيروسات والسرطان (غير متخصصة).</li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+
+    <div class="card">
+        <span class="badge">Antibodies (Ig)</span>
+        <h3 class="section-title">🎯 الأجسام المضادة (الذخيرة الذكية)</h3>
+        <ul>
+            <li><strong>التركيب:</strong> زوجان من السلاسل (2 ثقيلة و 2 خفيفة) ترتبط بـ <span class="func">روابط كبريتيدية ثنائية</span>. لها موقعان لارتباط الأنتيجن تشبه القفل والمفتاح، وموقع للمتممات.</li>
+            <li><strong>أنواعها (MAGED):</strong>
+                <ul style="margin-top: 10px; margin-right: 20px;">
+                    <li><span class="func">IgM:</span> الأضخم (5 وحدات بـ 10 مناطق ارتباط)، الأكفأ في التلازن.</li>
+                    <li><span class="func">IgG:</span> الأكثر وفرة، يعبر المشيمة.</li>
+                    <li><span class="func">IgA:</span> في الإفرازات (اللعاب، الحليب).</li>
+                    <li><span class="func">IgE:</span> للحساسية والديدان.</li>
+                    <li><span class="func">IgD:</span> مستقبل على الخلايا البائية.</li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+
+    <div class="card">
+        <span class="badge">Chemical Messengers</span>
+        <h3 class="section-title">💬 المواد الكيميائية المساعدة (لغة الحوار)</h3>
+        <ul>
+            <li><strong>الكيموكينات:</strong> عوامل جذب للخلايا البلعمية نحو موقع الإصابة <span class="link">(إشارات استغاثة)</span>.</li>
+            <li><strong>الإنترلوكينات:</strong> أداة اتصال وأوامر بين خلايا الجهاز المناعي.</li>
+            <li><strong>المتممات:</strong> بروتينات تدمر أغلفة الميكروبات وتذيبها <span class="patho">بعد</span> ارتباطها بالأجسام المضادة.</li>
+            <li><strong>الإنترفيرونات:</strong> تفرزها الخلايا المصابة بالفيروس لتمنع إنزيمات التضاعف في الخلايا السليمة المجاورة <span class="func">(تضحية الخلية لإنقاذ جيرانها)</span>.</li>
+        </ul>
+    </div>
+
+    <div class="card">
+        <span class="badge">Defense Lines</span>
+        <h3 class="section-title">🛡️ خطوط الدفاع (الأول والثاني)</h3>
+        <ul>
+            <li><strong>الخط الأول (الحواجز لمنع الدخول):</strong> الجلد، الصملاخ (شمع الأذن)، الدموع، المخاط والأهداب، اللعاب، وحمض المعدة HCl.</li>
+            <li><strong>الخط الثاني (الاستجابة بالالتهاب):</strong> دفاع غير متخصص إذا دخل الميكروب.
+                <br>تفرز الخلايا الصارية والقاعدية <span class="patho">الهيستامين</span> الذي يمدد الأوعية الدموية ويزيد نفاذيتها للسوائل والبروتينات القاتلة.
+                <br>يشمل أيضاً الإنترفيرونات والخلايا القاتلة الطبيعية (NK).
+            </li>
+        </ul>
+    </div>
+
+    <div class="card">
+        <span class="badge">Mechanism - Phase 1 & 2</span>
+        <h3 class="section-title">🔍 آلية العمل (التعرف والتنشيط)</h3>
+        <ul>
+            <li><strong>التعرف (العرض):</strong> تبتلع البلعمية الكبيرة الميكروب، تفككه بالليسوومات، وتربط الأنتيجين ببروتين <span class="func">MHC-II</span> وتعرضه على سطحها (لتصبح APC).</li>
+            <li><strong>التنشيط (دور المايسترو):</strong> تتعرف <span class="func">T_h</span> عبر مستقبلها <span class="link">CD4</span> على المعقد المعروض وتصبح نشطة. تفرز <span class="func">الإنترلوكينات</span> كأمر تعيين لتنشيط وتكوين سلالات من T_h والذاكرة.</li>
+        </ul>
+    </div>
+
+    <div class="card">
+        <span class="badge">Attack Phase</span>
+        <h3 class="section-title">⚔️ مسار الهجوم (الخط الثالث)</h3>
+        <ul>
+            <li><strong>المناعة الخلطية (الأعداء في السوائل):</strong> تنشط الخلايا (B) لتنقسم إلى بائية بلازمية تنتج <span class="func">الأجسام المضادة</span> (مثل التلازن بـ IgM وتنشيط المتممات)، وبائية ذاكرة.</li>
+            <li><strong>المناعة الخلوية (الخلايا المصابة/الخائنة):</strong> تفرز T_h <span class="func">السيتوكينات</span> لجذب البلعميات وتنشيط <span class="patho">T_c</span>. ترتبط T_c بمستقبل <span class="link">CD8</span> بالخلايا المصابة وتفرز:
+                <ul style="margin-top: 5px;">
+                    <li><span class="patho">البرفورين:</span> صانع الثقوب الذي يمزق غشاء الخلية.</li>
+                    <li><span class="patho">السموم الليمفاوية:</span> تنشط جينات انتحار النواة بالخلية المصابة.</li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+
+    <div class="card">
+        <span class="badge">Regulation & Memory</span>
+        <h3 class="section-title">🛑 التثبيط وخلايا الذاكرة</h3>
+        <ul>
+            <li><strong>مرحلة التثبيط:</strong> تتدخل <span class="func">T_s</span> عبر <span class="link">CD8</span> وترتبط بالخلايا النشطة. تفرز <span class="func">الليمفوكينات</span> لوقف إنتاج الأجسام المضادة وقتل الخلايا النشطة الزائدة تاركةً خلايا الذاكرة فقط.</li>
+            <li><strong>خلايا الذاكرة (الأرشيف السري):</strong> (بائية وتائية) تخزن معلومات الأنتيجين وسرعة الرد. تعيش لعشرات السنين، وتجول بالدم لمراقبة أي هجوم جديد لنفس الميكروب.</li>
+        </ul>
+    </div>
+
+    <div class="card">
+        <span class="badge">Immune Responses</span>
+        <h3 class="section-title">⏱️ الاستجابة الأولية مقابل الثانوية</h3>
+        <ul>
+            <li><strong>الأولية:</strong> أول تعامل. بطيئة (5-10 أيام). تعتمد على B و T الأصلية. تظهر <span class="patho">أعراض المرض</span>. الجسم المضاد الأساسي بالبداية <span class="func">IgM</span>.</li>
+            <li><strong>الثانوية:</strong> ثاني تعامل مع نفس الميكروب. سريعة جداً. تعتمد على <span class="link">خلايا الذاكرة</span>. <span class="func">لا تظهر أعراض</span>. الجسم المضاد الأساسي <span class="func">IgG</span> بتركيزات عالية.</li>
+            <li><strong>تركات:</strong> نصاب بالبرد مراراً لأن الفيروس يغير أنتيجيناته، فيتطلب استجابة أولية جديدة كل مرة.</li>
+        </ul>
+    </div>
+
+    <div class="card hero-box" style="padding: 30px;">
+        <span class="badge">Medical Applications</span>
+        <h3 class="section-title">💉 التطبيقات الطبية: اللقاح مقابل المصل</h3>
+        <table>
+            <tr>
+                <th>وجه المقارنة</th>
+                <th>اللقاح (Vaccine)</th>
+                <th>المصل (Serum)</th>
+            </tr>
+            <tr>
+                <td><strong>المحتوى</strong></td>
+                <td>ميكروب (ضعيف أو ميت) أو أنتيجيناته.</td>
+                <td>أجسام مضادة جاهزة.</td>
+            </tr>
+            <tr>
+                <td><strong>آلية العمل</strong></td>
+                <td>يحفز الجسم لعمل <span class="func">استجابة أولية وذاكرة</span>.</td>
+                <td>حماية <span class="patho">فورية</span> دون انتظار.</td>
+            </tr>
+            <tr>
+                <td><strong>الهدف والمدة</strong></td>
+                <td><span class="link">الوقاية</span> طويلة الأمد (لسنوات).</td>
+                <td><span class="link">العلاج السريع</span> مؤقت (تختفي من الدم).</td>
+            </tr>
+        </table>
+        <p style="margin-top: 15px; font-weight: bold; text-align: right; color: var(--hl-patho);">⚠️ ملاحظة: فشل المناعة (الإيدز HIV) يحدث لأنه يهاجم المايسترو (T_h)، مما يؤدي لانهيار المسارين الخلطي والخلوي تماماً.</p>
+    </div>
+
+</div>
+
+<footer>
+    كل الحقوق محفوظه في @Ahmed Mostafa 2026
+</footer>
+
+<script>
+// --- محرك الجسيمات المتقدم ---
+const canvas = document.getElementById('particle-canvas');
+const ctx = canvas.getContext('2d');
+let particles = [];
+let currentColor = '#00f2fe'; // اللون الافتراضي
+
+function getThemeColor() {
+    // جلب لون الأساس من المتغيرات في CSS
+    const root = document.documentElement;
+    return getComputedStyle(root).getPropertyValue('--particle-color').trim() || '#00f2fe';
+}
+
+function hexToRgb(hex) {
+    // تحويل الكود السداسي لشفافية
+    var shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+    hex = hex.replace(shorthandRegex, function(m, r, g, b) {
+        return r + r + g + g + b + b;
+    });
+    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` : null;
+}
+
+function initParticles() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    particles = [];
+    let count = document.getElementById('pCount').value;
+    currentColor = getThemeColor();
+    
+    for (let i = 0; i < count; i++) {
+        particles.push({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            vx: (Math.random() - 0.5) * 2,
+            vy: (Math.random() - 0.5) * 2,
+            size: Math.random() * 2.5 + 0.5
+        });
+    }
+}
+
+function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    let speedMult = parseFloat(document.getElementById('pSpeed').value);
+    
+    // استخراج قيمة RGB لعمل الشفافية في الخطوط
+    let rgbColor = hexToRgb(currentColor) || '0, 242, 254';
+
+    for (let i = 0; i < particles.length; i++) {
+        let p = particles[i];
+        p.x += p.vx * speedMult;
+        p.y += p.vy * speedMult;
+
+        if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
+        if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+
+        ctx.fillStyle = currentColor;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fill();
+
+        // رسم الخطوط الشبكية
+        for (let j = i + 1; j < particles.length; j++) {
+            let p2 = particles[j];
+            let dist = Math.sqrt((p.x - p2.x)**2 + (p.y - p2.y)**2);
+            if (dist < 120) {
+                ctx.strokeStyle = `rgba(${rgbColor}, ${1 - dist/120})`;
+                ctx.lineWidth = 0.8;
+                ctx.beginPath();
+                ctx.moveTo(p.x, p.y);
+                ctx.lineTo(p2.x, p2.y);
+                ctx.stroke();
+            }
+        }
+    }
+    requestAnimationFrame(draw);
+}
+
+function changeTheme() {
+    const theme = document.getElementById('themeSelector').value;
+    if (theme === 'default') {
+        document.documentElement.removeAttribute('data-theme');
+    } else {
+        document.documentElement.setAttribute('data-theme', theme);
+    }
+    
+    // تحديث لون الجسيمات بعد تغيير الثيم بقليل
+    setTimeout(() => {
+        currentColor = getThemeColor();
+    }, 100);
+}
+
+window.addEventListener('resize', initParticles);
+initParticles();
+draw();
+</script>
+</body>
+</html>
