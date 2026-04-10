@@ -1096,4 +1096,529 @@ draw();
 
         .badge-plant {
             background: linear-gradient(45deg, #2ecc71, #f1c40f);
-            box-shado
+            box-shadow: 0 0 15px rgba(46, 204, 113, 0.5);
+        }
+
+        /* نافذة التحكم */
+        .controls { position: fixed; bottom: 25px; left: 25px; z-index: 1001; }
+        .settings-panel {
+            background: rgba(10, 15, 25, 0.95);
+            padding: 30px;
+            border-radius: 20px;
+            border: 1px solid var(--primary);
+            display: none;
+            box-shadow: 0 0 40px rgba(0,0,0,0.9);
+            backdrop-filter: blur(25px);
+            color: white;
+            min-width: 300px;
+        }
+        .active { display: block; animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
+
+        button.btn-settings {
+            padding: 12px 25px;
+            border-radius: 12px;
+            border: 2px solid var(--primary);
+            background: rgba(0,0,0,0.5);
+            color: var(--primary);
+            font-weight: 900;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Cairo', sans-serif;
+            font-size: 1.1rem;
+            backdrop-filter: blur(10px);
+        }
+
+        button.btn-settings:hover {
+            background: var(--primary);
+            color: #000;
+            box-shadow: 0 0 25px var(--primary);
+            transform: translateY(-2px);
+        }
+
+        select, input[type="range"] {
+            width: 100%; margin-top: 10px; margin-bottom: 20px; padding: 10px;
+            background: rgba(0,0,0,0.6); color: white; border: 1px solid var(--border-glass);
+            border-radius: 8px; font-family: 'Cairo', sans-serif; outline: none;
+            transition: border-color 0.3s;
+        }
+        select:focus, input[type="range"]:focus { border-color: var(--primary); }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; color: var(--text-main); border-radius: 10px; overflow: hidden; }
+        th, td { padding: 15px; border: 1px solid var(--border-glass); text-align: right; }
+        th { background: rgba(0, 0, 0, 0.6); color: var(--primary); font-size: 1.1rem; }
+        tr:hover { background: rgba(255,255,255,0.02); }
+
+        .divider {
+            grid-column: 1 / -1;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--border-glass), transparent);
+            margin: 20px 0;
+        }
+
+        footer {
+            text-align: center; padding: 30px; margin-top: 60px;
+            border-top: 1px solid var(--border-glass); background: rgba(0,0,0,0.7);
+            color: var(--primary); font-weight: bold; backdrop-filter: blur(10px);
+            font-size: 1.2rem;
+            letter-spacing: 1px;
+        }
+    </style>
+</head>
+<body>
+
+<canvas id="particle-canvas"></canvas>
+
+<header>
+    <div class="logo">Medo </div>
+    <button class="btn-settings" onclick="document.querySelector('.settings-panel').classList.toggle('active')">⚙️ لوحة التحكم</button>
+</header>
+
+<div class="controls">
+    <div class="settings-panel">
+        <h3 style="margin-bottom: 20px; color: var(--primary); text-align: center; font-weight: 900; border-bottom: 1px solid var(--border-glass); padding-bottom: 10px;">النظام البيئي</h3>
+        
+        <label>🎨 اختيار الثيم البصري</label>
+        <select id="themeSelector" onchange="changeTheme()">
+            <option value="default">🌐 Cyber Blue (الافتراضي)</option>
+            <option value="matrix">💻 Neon Matrix (ماتريكس)</option>
+            <option value="blood">🩸 Crimson Blood (الدموي)</option>
+            <option value="amethyst">🔮 Royal Amethyst (الأرجواني)</option>
+            <option value="solar">☀️ Solar Flare (الشمسي)</option>
+            <option value="ocean">🌊 Deep Ocean (المحيط)</option>
+            <option value="forest">🌲 Forest Synapse (البيولوجي)</option>
+        </select>
+
+        <label>✨ كثافة الجسيمات (Particles)</label>
+        <input type="range" id="pCount" min="20" max="400" value="180" onchange="initParticles()">
+        
+        <label>⚡ سرعة التفاعل الحر</label>
+        <input type="range" id="pSpeed" min="0.5" max="5" value="1.5" step="0.5">
+    </div>
+</div>
+
+<div class="container">
+    
+    <div class="hero-box" style="border-color: var(--plant-color); box-shadow: 0 10px 30px rgba(46, 204, 113, 0.2);">
+        <h1 class="gradient-text plant-gradient" style="font-size: 3rem;">🌱 المناعة في النبات</h1>
+        <p style="font-size: 1.3rem; margin-top: 15px; color: #ccc;">الدرع الأخضر: استراتيجيات الدفاع الذاتي والبقاء في المملكة النباتية</p>
+    </div>
+
+    <div class="card card-plant">
+        <span class="badge badge-plant">Threats & Causes</span>
+        <h3 class="section-title">⚠️ 1. مسببات المرض والموت في النبات</h3>
+        <p style="margin-bottom: 15px; font-size: 1.1rem;">تتعرض النباتات لضغوط مستمرة تهدد حياتها، وتُصنف المسببات إلى ثلاثة أقسام رئيسية:</p>
+        <ul>
+            <li><strong>الأعداء الخطرة (أضرار بالغة):</strong> تشمل حيوانات الرعي، الحشرات، الفطريات، البكتيريا، والفيروسات. تسبب أضراراً قد تودي بحياة النبات أو تسبب أمراضاً خطيرة.</li>
+            <li><strong>الظروف غير الملائمة (أضرار يمكن تلافيها):</strong> مثل الحرارة العالية أو المنخفضة جداً، نقص أو زيادة الماء، نقص العناصر الغذائية، والتربة غير الملائمة. <em>(تزول بزوال السبب)</em>.</li>
+            <li><strong>المواد السامة (قاتلة أحياناً):</strong> تشمل الدخان، الأبخرة السامة، المبيدات الحشرية، الصرف الصحي غير المعالج، والمخلفات الصناعية.</li>
+        </ul>
+    </div>
+
+    <div class="card card-plant">
+        <span class="badge badge-plant">Pre-existing Immunity</span>
+        <h3 class="section-title">🛡️ 2. المناعة التركيبية (الموجودة سلفاً)</h3>
+        <p style="margin-bottom: 15px;">هي خط الدفاع الأول، وتتمثل في حواجز وتراكيب طبيعية يمتلكها النبات خلقةً لمنع دخول الممرضات.</p>
+        <h4 style="color: var(--plant-color); margin-bottom: 10px; font-weight: 900;">أ- الأدمة الخارجية (حائط الصد الأول):</h4>
+        <ul>
+            <li><span class="highlight-plant">الطبقة الشمعية:</span> تغطي البشرة لتمنع استقرار الماء عليها، فلا تتوافر البيئة الصالحة لنمو الفطريات وتكاثر البكتيريا.</li>
+            <li><span class="highlight-plant">الشعيرات والأشواك:</span> تمنع تجمع الماء، وتقلل من أكل حيوانات الرعي للنبات.</li>
+        </ul>
+        <h4 style="color: var(--plant-color); margin-bottom: 10px; font-weight: 900;">ب- الجدار الخلوي (الدرع الواقي):</h4>
+        <ul>
+            <li>يمثل الحماية الخارجية للخلايا (خاصة خلايا البشرة).</li>
+            <li>يتركب أساساً من <strong>السليلوز</strong>، ويتغلظ أحياناً بمادة <span class="highlight-plant">اللجنين</span> ليصبح صلباً جداً، مما يصعب على الكائنات الممرضة اختراقه.</li>
+        </ul>
+    </div>
+
+    <div class="card card-plant hero-box" style="padding: 30px; text-align: right; background: rgba(10, 30, 15, 0.8);">
+        <span class="badge badge-plant">Induced Structure Immunity</span>
+        <h3 class="section-title" style="justify-content: flex-start;">🧱 3. المناعة التركيبية (المستحثة كاستجابة للإصابة)</h3>
+        <p style="margin-bottom: 20px; font-size: 1.1rem;">تراكيب مناعية تتكون داخل النبات <span class="patho">فقط عند تعرضه للإصابة أو القطع</span> لمنع دخول أو انتشار الميكروب.</p>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+            <div>
+                <h4 style="color: #f1c40f; margin-bottom: 10px;">1. تكوين الفلين (Cork):</h4>
+                <ul>
+                    <li>يتكون لعزل المناطق التي تعرضت للقطع أو التمزق (بسبب نمو النبات في السمك، جمع الثمار، أو سقوط الأوراق).</li>
+                    <li><strong>الهدف:</strong> منع دخول الكائن الممرض للداخل.</li>
+                </ul>
+            </div>
+            <div>
+                <h4 style="color: #f1c40f; margin-bottom: 10px;">2. تكوين التيلوزات (Tyloses):</h4>
+                <ul>
+                    <li>هي نموات زائدة تنشأ من تمدد الخلايا البارانشيمية المجاورة لقصيبات الخشب السليمة.</li>
+                    <li>تتكون عند تعرض الجهاز الوعائي للقطع أو الغزو، فتمتد داخل الأوعية الخشبية لتسدها.</li>
+                    <li><strong>الهدف:</strong> إعاقة تحرك الميكروب وانتقاله للأجزاء السليمة.</li>
+                </ul>
+            </div>
+            <div>
+                <h4 style="color: #f1c40f; margin-bottom: 10px;">3. ترسب الصموغ (Gums):</h4>
+                <ul>
+                    <li>تفرز النباتات المصابة بجروح أو قطوع مادة صمغية حول مكان الإصابة.</li>
+                    <li><strong>الهدف:</strong> سد الجروح ومنع دخول الميكروبات.</li>
+                </ul>
+            </div>
+            <div>
+                <h4 style="color: #f1c40f; margin-bottom: 10px;">4. الحساسية المفرطة (Hypersensitivity):</h4>
+                <ul>
+                    <li>التخلص من النسيج المصاب بالكامل (قتل النسيج الذاتي).</li>
+                    <li>يضحي النبات بالورقة أو الجزء المصاب لمنع انتشار الميكروب للأنسجة السليمة المجاورة.</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div style="margin-top: 15px; padding: 15px; border-right: 4px solid #2ecc71; background: rgba(0,0,0,0.5);">
+            <h4 style="color: var(--plant-color);">5. التراكيب المناعية الخلوية (تغيرات شكلية):</h4>
+            <p style="margin-right: 15px;">• <strong>انتفاخ الجدر الخلوية:</strong> لخلايا البشرة وتحت البشرة أثناء الاختراق المباشر للميكروب لتثبيط اختراقه.<br>
+            • <strong>الغلاف العازل:</strong> إحاطة خيوط الغزل الفطري المهاجمة بغلاف عازل يمنع انتقالها لخلايا أخرى.</p>
+        </div>
+    </div>
+
+    <div class="card card-plant">
+        <span class="badge badge-plant">Biochemical Immunity</span>
+        <h3 class="section-title">🧪 4. المناعة البيوكيميائية (الأسلحة الكيميائية)</h3>
+        <p style="margin-bottom: 15px;">استجابات النبات بإفراز مواد كيميائية مضادة للكائنات الممرضة.</p>
+        
+        <h4 style="color: var(--plant-color); margin-bottom: 10px;">أ- المستقبلات (Receptors - أجهزة الإنذار):</h4>
+        <ul>
+            <li>مركبات توجد في النباتات السليمة والمصابة، لكن <span class="func">يزداد تركيزها عقب الإصابة</span>.</li>
+            <li><strong>الوظيفة:</strong> إدراك وجود الميكروب، وتنشيط دفاعات النبات (تحفيز وسائل المناعة الموروثة).</li>
+        </ul>
+        
+        <h4 style="color: var(--plant-color); margin-bottom: 10px;">ب- مواد كيميائية مضادة للكائنات الدقيقة:</h4>
+        <ul>
+            <li>قد تكون موجودة أصلاً أو تتكون بعد الإصابة.</li>
+            <li><span class="highlight-plant">الفينولات والجلوكوزيدات:</span> مركبات كيميائية سامة تقتل الكائنات الممرضة (مثل البكتيريا) أو تثبط نموها.</li>
+            <li><span class="highlight-plant">أحماض أمينية غير بروتينية:</span> لا تدخل في بناء البروتين، بل تعمل كمواد واقية وسامة، مثل: <strong>الكانافانين (Canavanine)</strong> و <strong>السيفالوسبورين (Cephalosporin)</strong>.</li>
+        </ul>
+
+        <h4 style="color: var(--plant-color); margin-bottom: 10px;">ج- بروتينات مضادة للكائنات الدقيقة:</h4>
+        <ul>
+            <li>بروتينات <span class="patho">لا توجد أصلاً في النبات السليم</span>، بل يستحث تكوينها نتيجة الإصابة.</li>
+            <li>أهمها <span class="highlight-plant">إنزيمات نزع السمية (Detoxifying enzymes)</span>: تتفاعل مع السموم التي تفرزها الممرضات وتبطل سميتها، لتصبح غير ضارة للنبات.</li>
+        </ul>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="hero-box" style="margin-top: 20px;">
+        <h1 class="gradient-text" style="font-size: 3rem;">🧍‍♂️ المناعة في الإنسان (و الكائنات الحية)</h1>
+        <p style="font-size: 1.3rem; margin-top: 15px; color: #ccc;">جيش الدفاع البشري: دليلك الشامل لآليات الدفاع، خطوط المواجهة، والاستجابة المناعية الكاملة</p>
+    </div>
+
+    <div class="card">
+        <span class="badge">Lymphatic Organs</span>
+        <h3 class="section-title">🏰 1. الجهاز الليمفاوي (أعضاء وجنود الجيش)</h3>
+        <p style="margin-bottom: 15px;">الجهاز المناعي <span class="link">"جهاز متناثر"</span> لا تتصل أعضاؤه تشريحياً، بل يربطها الدم واللمف.</p>
+        <h4 style="color: var(--primary); margin-bottom: 10px; font-weight: bold;">أ- الأعضاء الليمفاوية (أماكن التصنيع والتدريب):</h4>
+        <ul>
+            <li><strong>نخاع العظام الأحمر:</strong> يوجد في العظام المسطحة ورؤوس العظام الطويلة. هو المسؤول عن <span class="func">إنتاج</span> جميع خلايا الدم، وفيه <span class="func">تنضج</span> الخلايا البائية (B) والخلايا القاتلة الطبيعية (NK).</li>
+            <li><strong>الغدة التيموسية:</strong> تقع على القصبة الهوائية أعلى القلب. تفرز هرمون <span class="func">التيموسين</span>. وظيفته تحويل الخلايا الليمفاوية الجذعية إلى خلايا <span class="func">تائية (T)</span> وتمايزها لأنواعها (T_h, T_c, T_s).</li>
+            <li><strong>اللوزتان:</strong> تلتقطان الميكروبات مع الطعام والهواء.</li>
+            <li><strong>الطحال:</strong> يقع في الجانب العلوي الأيسر من تجويف البطن. يحتوي على خلايا بلعمية تلتهم الميكروبات وكريات الدم الحمراء الهرمة (المسنة).</li>
+            <li><strong>بقع باير:</strong> عقد صغيرة في الغشاء المخاطي المبطن للجزء السفلي من الأمعاء الدقيقة. تلعب دوراً في الاستجابة المناعية ضد الميكروبات المعوية.</li>
+            <li><strong>العقد الليمفاوية:</strong> منتشرة بالجسم، تعمل كـ <span class="func">مرشحات</span> لليمف، وتخزن الخلايا الليمفاوية.</li>
+        </ul>
+    </div>
+
+    <div class="card">
+        <span class="badge">White Blood Cells</span>
+        <h3 class="section-title">🪖 ب- خلايا الدم البيضاء (العساكر)</h3>
+        <ul>
+            <li><strong>خلايا محببة (متعادلة، حامضية، قاعدية):</strong> تهاجم البكتيريا والالتهابات، وتتميز بوجود حبيبات تفرز إنزيمات محللة. النواة تكون مفصصة أو ثنائية.</li>
+            <li><strong>الخلايا وحيدة النواة (Monocytes):</strong> تدمر الأجسام الغريبة وتتحول إلى <span class="func">خلايا بلعمية</span> عند الحاجة.</li>
+            <li><strong>الخلايا الليمفاوية (20-30% من البيضاء):</strong>
+                <ul style="margin-top: 10px; margin-right: 25px;">
+                    <li><strong>الخلايا البائية (B):</strong> تنتج الأجسام المضادة (10-15% من الليمفاوية). تنضج في النخاع.</li>
+                    <li><strong>الخلايا التائية (T):</strong> (80% من الليمفاوية) تنضج في التيموسية وتشمل:
+                        <ul style="margin-top: 5px; margin-right: 25px;">
+                            <li><span class="func">T_h (المساعدة):</span> المايسترو، تحمل مستقبل <strong>CD4</strong>.</li>
+                            <li><span class="patho">T_c (السامة):</span> تدمر الخلايا المصابة والسرطانية والمزروعة، تحمل مستقبل <strong>CD8</strong>.</li>
+                            <li><span class="link">T_s (الكابحة):</span> تنظم المناعة وتوقفها بعد الشفاء، تحمل مستقبل <strong>CD8</strong>.</li>
+                        </ul>
+                    </li>
+                    <li><strong>الخلايا القاتلة الطبيعية (NK):</strong> (5-10%) تهاجم الخلايا المصابة بالفيروسات والسرطان بالإنزيمات (غير متخصصة).</li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+
+    <div class="card">
+        <span class="badge">Antibodies</span>
+        <h3 class="section-title">🎯 2. الأجسام المضادة (الذخيرة الذكية)</h3>
+        <p style="margin-bottom: 15px;">بروتينات تنظيمية تسمى "غلوبيولينات مناعية" (Ig) تأخذ شكل حرف Y.</p>
+        <h4 style="color: var(--primary); margin-bottom: 10px;">التركيب الدقيق:</h4>
+        <ul>
+            <li>زوجان من السلاسل البروتينية: 2 ثقيلة (طويلة) و 2 خفيفة (قصيرة).</li>
+            <li>يرتبطون بـ <span class="func">روابط كبريتيدية ثنائية</span>.</li>
+            <li>لكل جسم مضاد موقعان لارتباط الأنتيجن (المنطقة المتغيرة V) يشبهان القفل والمفتاح، وموقع ثابت لارتباط المتممات على السلاسل الثقيلة.</li>
+        </ul>
+        <h4 style="color: var(--primary); margin-bottom: 10px;">الأنواع المجموعة في كلمة (MAGED):</h4>
+        <ul>
+            <li><span class="func">IgM:</span> هو الأضخم، يتكون من 5 وحدات (على شكل نجمة)، لذا يمتلك <strong>10 مناطق ارتباط</strong> بالأنتيجن. هو الأكفأ في طريقة "التلازن" (Agglutination).</li>
+            <li><span class="func">IgG:</span> الأكثر وفرة في الدم، صغير الحجم مما يسمح له بعبور المشيمة لحماية الجنين.</li>
+            <li><span class="func">IgA:</span> يوجد بكثرة في الإفرازات المخاطية واللعاب وحليب الأم.</li>
+            <li><span class="func">IgE:</span> مرتبط بتفاعلات الحساسية ومكافحة الديدان الطفيلية.</li>
+            <li><span class="func">IgD:</span> يعمل أساساً كمستقبل على سطح الخلايا البائية الناضجة.</li>
+        </ul>
+    </div>
+
+    <div class="card">
+        <span class="badge">Defense Lines 1 & 2</span>
+        <h3 class="section-title">🛡️ 3. خطوط الدفاع (الأول والثاني) - المناعة الفطرية</h3>
+        <h4 style="color: var(--primary); margin-bottom: 10px;">الخط الأول: الحواجز (منع الدخول - ميكانيكي وكيميائي)</h4>
+        <ul>
+            <li><strong>الجلد:</strong> الطبقة القرنية الصلبة تمنع الاختراق، والعرق بحموضته العالية يقتل الميكروبات.</li>
+            <li><strong>الصملاخ:</strong> شمع الأذن يقتل الميكروبات التي تدخل الأذن.</li>
+            <li><strong>الدموع:</strong> سائل يحمي العين ويحتوي على إنزيمات محللة للميكروبات.</li>
+            <li><strong>المخاط والأهداب:</strong> في الممرات التنفسية لالتقاط الميكروبات وطردها.</li>
+            <li><strong>اللعاب و HCl:</strong> اللعاب يذيب الميكروبات، وحمض المعدة يقتل ما يبتلع مع الطعام.</li>
+        </ul>
+        <h4 style="color: var(--primary); margin-bottom: 10px;">الخط الثاني: الاستجابة بالالتهاب (Inflammation)</h4>
+        <ul>
+            <li>نظام دفاعي داخلي غير متخصص يعمل إذا اخترق الميكروب الخط الأول (مثل جرح).</li>
+            <li>تقوم الخلايا الصارية (Mast cells) والخلايا القاعدية بإفراز <span class="patho">الهيستامين</span> كمولد للالتهاب.</li>
+            <li><strong>تأثير الهيستامين:</strong> تمدد الأوعية الدموية لأقصى مدى + زيادة نفاذيتها، مما يسمح بخروج البلازما (تورم، احمرار، ألم) وخروج المواد القاتلة والخلايا البلعمية لموقع الجرح.</li>
+            <li>يشمل الخط الثاني أيضاً <span class="func">الإنترفيرونات</span> و الخلايا القاتلة الطبيعية <span class="func">(NK)</span>.</li>
+        </ul>
+    </div>
+
+    <div class="card hero-box" style="padding: 40px; text-align: right;">
+        <span class="badge">Defense Line 3</span>
+        <h3 class="section-title gradient-text" style="justify-content: flex-start; border: none;">⚔️ الخط الثالث: المناعة المكتسبة (المتخصصة)</h3>
+        <p style="margin-bottom: 25px; font-size: 1.1rem; color: #ddd;">هنا تبدأ الحرب الحقيقية والموجهة. تعتمد على الخلايا الليمفاوية وتتم عبر مسارين مرتبطين تماماً:</p>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 30px;">
+            <div style="background: rgba(0,0,0,0.4); padding: 25px; border-radius: 15px; border-right: 4px solid var(--secondary);">
+                <h4 style="color: var(--secondary); margin-bottom: 15px; font-size: 1.3rem;">1. المناعة الخلطية (بالأجسام المضادة)</h4>
+                <ul style="font-size: 1.05rem;">
+                    <li>تتعرف الخلايا (B) على الأنتيجن بواسطة مستقبلاتها وتلتصق به وتفتته وتعرضه مع بروتين التوافق النسيجي (MHC).</li>
+                    <li>في نفس الوقت، تبتلع الخلية البلعمية الميكروب وتعرض معقده (MHC + الأنتيجن).</li>
+                    <li>تتعرف الخلية T_h على البلعمية وتنشط، وتفرز <span class="func">الإنترلوكينات</span>.</li>
+                    <li>تنشط الإنترلوكينات الخلايا (B) العارضة، فتنقسم إلى: 
+                        <br><strong>• بائية بلازمية</strong> (تنتج أجسام مضادة ضخمة).
+                        <br><strong>• بائية ذاكرة</strong> (تبقى في الدم 20-30 سنة لحماية مستقبلية).</li>
+                </ul>
+            </div>
+            <div style="background: rgba(0,0,0,0.4); padding: 25px; border-radius: 15px; border-right: 4px solid var(--hl-patho);">
+                <h4 style="color: var(--hl-patho); margin-bottom: 15px; font-size: 1.3rem;">2. المناعة الخلوية (بالخلايا التائية السامة)</h4>
+                <ul style="font-size: 1.05rem;">
+                    <li>هي الاستجابة الأقوى (للفيروسات، السرطان، والأعضاء المزروعة).</li>
+                    <li>تفرز T_h المنشطة بروتينات <span class="func">السيتوكينات</span>.</li>
+                    <li><strong>وظيفة السيتوكينات:</strong> تجذب البلعميات بشراهة، تنشط البائية، والأهم: تنشط الخلايا التائية السامة (T_c) والخلايا (NK).</li>
+                    <li>ترتبط T_c بالخلية المصابة وتدمرها بإفراز:
+                        <ul style="margin-top: 10px;">
+                            <li><span class="patho">البرفورين:</span> صانع الثقوب الذي يثقب غشاء الخلية المصابة.</li>
+                            <li><span class="patho">السموم الليمفاوية:</span> تدخل من الثقوب لتنشط جينات في نواة الخلية المصابة تدمر النواة وتميتها.</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <span class="badge">Chemicals & Regulation</span>
+        <h3 class="section-title">💬 4. المواد الكيميائية المساعدة و التثبيط</h3>
+        <h4 style="color: var(--primary); margin-bottom: 10px;">لغة الحوار والتواصل الكيميائي:</h4>
+        <ul>
+            <li><strong>الكيموكينات (Chemokines):</strong> عوامل جذب كيميائي تجذب الخلايا البلعمية الدوارة بأعداد كبيرة نحو موقع الإصابة.</li>
+            <li><strong>الإنترلوكينات (Interleukins):</strong> أداة اتصال (تليفون) بين خلايا الجهاز المناعي وبينها وبين خلايا الجسم الأخرى، وتنشط الخلايا البائية.</li>
+            <li><strong>المتممات (المكملات):</strong> بروتينات وإنزيمات تدمر أغلفة الميكروبات وتذيب محتوياتها <span class="link">فقط بعد ارتباطها بالأجسام المضادة</span>، لتسهل بلعمتها.</li>
+            <li><strong>الإنترفيرونات (Interferons):</strong> رسل إنذار. بروتينات تفرزها الخلية <span class="patho">المصابة بالفيروس</span> لتذهب للخلايا السليمة المجاورة وتحثها على إنتاج إنزيمات تمنع تضاعف الفيروس.</li>
+        </ul>
+        <h4 style="color: var(--primary); margin-bottom: 10px; margin-top: 20px;">مرحلة التثبيط (نهاية المعركة وإعلان النصر):</h4>
+        <ul>
+            <li>بعد القضاء على الميكروب، لا يجب أن تستمر المناعة في الهيجان. تتدخل الخلايا التائية الكابحة <span class="link">(T_s)</span>.</li>
+            <li>ترتبط عبر مستقبلها <strong>CD8</strong> بالخلايا التائية المساعدة (T_h) والسامة (T_c) والبائية البلازمية.</li>
+            <li>تفرز بروتينات <span class="func">الليمفوكينات (Lymphokines)</span>.</li>
+            <li><strong>النتيجة:</strong> توقف إنتاج الأجسام المضادة، وموت الكثير من الخلايا T و B النشطة لتوفير طاقة الجسم، وتخزين الباقي كخلايا ذاكرة.</li>
+        </ul>
+    </div>
+
+    <div class="card">
+        <span class="badge">Primary vs Secondary</span>
+        <h3 class="section-title">📊 5. مقارنة الاستجابة المناعية</h3>
+        <table style="font-size: 1.05rem;">
+            <tr>
+                <th style="width: 25%;">وجه المقارنة</th>
+                <th style="width: 37.5%;">الاستجابة المناعية الأولية</th>
+                <th style="width: 37.5%;">الاستجابة المناعية الثانوية</th>
+            </tr>
+            <tr>
+                <td><strong>متى تحدث؟</strong></td>
+                <td>عند التعرض للميكروب لأول مرة.</td>
+                <td>عند دخول <span class="func">نفس الميكروب</span> مرة ثانية أو لاحقة.</td>
+            </tr>
+            <tr>
+                <td><strong>الخلايا المسؤولة</strong></td>
+                <td>الخلايا الليمفاوية B و T الساذجة (الأصلية).</td>
+                <td><span class="func">خلايا الذاكرة</span> (B و T) الجاهزة سلفاً.</td>
+            </tr>
+            <tr>
+                <td><strong>السرعة والأعراض</strong></td>
+                <td>بطيئة جداً (تستغرق 5-10 أيام)، <span class="patho">تظهر أعراض المرض</span> حيث يتكاثر الميكروب ببطء.</td>
+                <td>سريعة وقوية جداً، يتم القضاء على الميكروب قبل تكاثره، <span class="func">لا تظهر أعراض المرض</span>.</td>
+            </tr>
+            <tr>
+                <td><strong>الجسم المضاد السائد</strong></td>
+                <td><span class="func">IgM</span> يظهر بكثرة في البداية لتسريع التلازن وجمع الميكروبات.</td>
+                <td><span class="func">IgG</span> بتركيزات عالية جداً وحاسمة.</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="card hero-box" style="padding: 35px; background: rgba(5, 5, 10, 0.9);">
+        <span class="badge" style="background: linear-gradient(45deg, #ff0055, #ffcc00);">Medical Notes (Top-Tier)</span>
+        <h3 class="section-title gradient-text">🧬 التطبيقات الطبية وتركات المتفوقين</h3>
+        
+        <div style="display: flex; flex-wrap: wrap; gap: 30px; text-align: right; margin-top: 20px;">
+            <div style="flex: 1; min-width: 300px;">
+                <h4 style="color: var(--hl-link); margin-bottom: 15px;">اللقاح (Vaccine) مقابل المصل (Serum)</h4>
+                <ul>
+                    <li><strong>اللقاح (التطعيم):</strong> إعطاء الشخص الميكروب مقتولاً أو مضعفاً، أو أنتيجيناته فقط. 
+                        <br><span style="color: #aaa; font-size: 0.95rem;">- يحفز الجهاز المناعي لتكوين "خلايا ذاكرة" دون إحداث المرض القوي. الغرض منه <strong>وقائي ويدوم لسنوات/مدى الحياة</strong>. يعتبر (مناعة صناعية نشطة).</span>
+                    </li>
+                    <li style="margin-top: 15px;"><strong>المصل:</strong> حقن الشخص بـ "أجسام مضادة جاهزة" تم استخلاصها من كائن آخر (مثل مصل السموم أو داء الكلب).
+                        <br><span style="color: #aaa; font-size: 0.95rem;">- يوفر حماية فورية وجاهزة للحالات الطارئة، لكن الجسم لم يصنعها ولا تتكون خلايا ذاكرة. الغرض منه <strong>علاجي ومؤقت</strong> (ينتهي بتكسير الأجسام المضادة). يعتبر (مناعة صناعية سلبية).</span>
+                    </li>
+                </ul>
+            </div>
+            
+            <div style="flex: 1; min-width: 300px; background: rgba(255,0,0,0.05); padding: 20px; border-radius: 15px; border: 1px solid var(--hl-patho);">
+                <h4 style="color: var(--hl-patho); margin-bottom: 15px;">⚠️ أفكار مستويات عليا للربط:</h4>
+                <ul style="font-size: 0.95rem;">
+                    <li><strong>لماذا نصاب بالبرد أو الإنفلونزا مرات كثيرة؟</strong> لأن فيروسات البرد سريعة الطفرة وتغير شكل "الأنتيجينات" الخارجية باستمرار، فخلايا الذاكرة القديمة لا تتعرف عليها، ويبدأ الجسم استجابة مناعية "أولية" من جديد كل مرة.</li>
+                    <li><strong>خطورة الإيدز (HIV):</strong> الفيروس ذكي جداً، فهو لا يهاجم الجسم عشوائياً، بل يهاجم المايسترو نفسه <span class="patho">الخلايا التائية المساعدة (T_h)</span> ويدمرها. وبدون T_h، لا تتنشط البائية ولا T_c، فينهار النظام المناعي المكتسب بالكامل ويموت المريض من أمراض تافهة كفطريات الفم.</li>
+                    <li><strong>أزمة زراعة الأعضاء:</strong> عند زراعة كلية مثلاً، تتعرف الخلايا <span class="patho">(T_c)</span> على بروتين التوافق النسيجي (MHC) للعضو المزروع كجسم غريب وتدمره. لذا يعيش المريض على أدوية <span class="func">"مثبطة للمناعة"</span> مدى الحياة لتنويم الخلايا T_c.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<footer>
+    كل الحقوق محفوظه في @Ahmed Mostafa 2026 | نظام Medo AI التفاعلي
+</footer>
+
+<script>
+// --- محرك الجسيمات المتقدم والذكي ---
+const canvas = document.getElementById('particle-canvas');
+const ctx = canvas.getContext('2d');
+let particles = [];
+let currentColor = '#00f2fe';
+
+function getThemeColor() {
+    const root = document.documentElement;
+    return getComputedStyle(root).getPropertyValue('--particle-color').trim() || '#00f2fe';
+}
+
+function hexToRgb(hex) {
+    var shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+    hex = hex.replace(shorthandRegex, function(m, r, g, b) {
+        return r + r + g + g + b + b;
+    });
+    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` : null;
+}
+
+function initParticles() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    particles = [];
+    let count = document.getElementById('pCount').value;
+    currentColor = getThemeColor();
+    
+    for (let i = 0; i < count; i++) {
+        particles.push({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            vx: (Math.random() - 0.5) * 1.5,
+            vy: (Math.random() - 0.5) * 1.5,
+            size: Math.random() * 2.5 + 0.5
+        });
+    }
+}
+
+function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    let speedMult = parseFloat(document.getElementById('pSpeed').value);
+    
+    let rgbColor = hexToRgb(currentColor) || '0, 242, 254';
+
+    for (let i = 0; i < particles.length; i++) {
+        let p = particles[i];
+        p.x += p.vx * speedMult;
+        p.y += p.vy * speedMult;
+
+        if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
+        if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+
+        ctx.fillStyle = currentColor;
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = currentColor;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0; // reset for lines
+
+        for (let j = i + 1; j < particles.length; j++) {
+            let p2 = particles[j];
+            let dist = Math.sqrt((p.x - p2.x)**2 + (p.y - p2.y)**2);
+            if (dist < 130) {
+                ctx.strokeStyle = `rgba(${rgbColor}, ${0.4 - dist/325})`; // smooth fade
+                ctx.lineWidth = 0.8;
+                ctx.beginPath();
+                ctx.moveTo(p.x, p.y);
+                ctx.lineTo(p2.x, p2.y);
+                ctx.stroke();
+            }
+        }
+    }
+    requestAnimationFrame(draw);
+}
+
+function changeTheme() {
+    const theme = document.getElementById('themeSelector').value;
+    if (theme === 'default') {
+        document.documentElement.removeAttribute('data-theme');
+    } else {
+        document.documentElement.setAttribute('data-theme', theme);
+    }
+    
+    // Add brief flash effect on theme change
+    document.body.style.opacity = 0.8;
+    setTimeout(() => { document.body.style.opacity = 1; }, 200);
+
+    setTimeout(() => {
+        currentColor = getThemeColor();
+    }, 100);
+}
+
+// Interactive effect: particles move away from mouse
+let mouseX = 0, mouseY = 0;
+window.addEventListener('mousemove', (e) => {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+    
+    // Slight repulsion
+    for(let p of particles) {
+        let dx = p.x - mouseX;
+        let dy = p.y - mouseY;
+        let dist = Math.sqrt(dx*dx + dy*dy);
+        if(dist < 100) {
+            p.vx += dx * 0.005;
+            p.vy += dy * 0.005;
+        }
+    }
+});
+
+window.addEventListener('resize', initParticles);
+initParticles();
+draw();
+</script>
+</body>
+</html>
